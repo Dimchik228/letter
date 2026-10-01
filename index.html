@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Тебе письмо</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Caveat:wght@500;700&family=Manrope:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#190a16;--pink:#f58db3;--pink2:#e0649a;--cream:#fbf6ee;--ink:#f6e6ee;--soft:#b99aab;--glass:rgba(255,255,255,.07);
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*,*::before,*::after{box-sizing:inherit}
+html,body{height:100%;margin:0}
+body{background:radial-gradient(ellipse at 50% 45%,#4b1d3d 0,var(--bg) 62%);color:var(--ink);font-family:Manrope,system-ui,sans-serif;overflow-x:hidden;overflow-y:auto;display:flex}
+.scene{margin:auto;width:100%;max-width:400px;padding:20px;text-align:center;display:none;flex-direction:column;align-items:center}
+.scene.on{display:flex;animation:in .7s both}
+@keyframes in{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+h1,h2{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:44px;margin:0 0 22px;line-height:1.1}
+.hand{font-family:Caveat,cursive;font-weight:700}
+/* конверт */
+.env{position:relative;width:280px;height:186px;margin-top:40px;cursor:pointer;transform:rotate(-3deg);transition:transform .5s,opacity .6s;filter:drop-shadow(0 18px 30px #0008)}
+.env>div{position:absolute}
+.back{z-index:0;inset:0;background:#d8d1c6;border-radius:8px}
+.letter{z-index:2;left:8%;right:8%;top:8%;height:84%;background:var(--cream);border-radius:6px;transition:transform .9s .55s cubic-bezier(.3,.8,.3,1)}
+.front{z-index:4;inset:0;border-radius:8px;background:linear-gradient(160deg,#f1ece4,#ddd6cb);clip-path:polygon(0 0,50% 58%,100% 0,100% 100%,0 100%)}
+.flap{left:0;top:0;width:100%;height:58%;background:linear-gradient(#ece7df,#d6cfc4);clip-path:polygon(0 0,100% 0,50% 100%);transform-origin:top;transition:transform .6s,z-index 0s .3s;border-radius:8px 8px 0 0;z-index:3}
+.seal{z-index:5;left:50%;top:58%;width:50px;height:50px;margin:-25px 0 0 -25px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#d65a8c,#9c2c5e);color:#ffd6e6;font:600 24px 'Cormorant Garamond',serif;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 8px #0006;transition:opacity .3s}
+.nm{z-index:5;left:0;right:0;bottom:12px;font:700 24px Caveat,cursive;color:#4b2b3d;text-align:center}
+.env.open .flap{transform:perspective(700px) rotateX(180deg);z-index:1}
+.env.open .seal,.env.open .nm{opacity:0}
+.env.open .letter{transform:translateY(-62%)}
+.env.gone{opacity:0;transform:translateY(80px) rotate(-3deg);pointer-events:none}
+.tap{margin-top:34px;color:var(--soft);font-size:14px;animation:pulse 2s infinite}
+@keyframes pulse{50%{opacity:.35}}
+/* письмо */
+.note{width:100%;background:var(--cream);color:#c4467c;border-radius:10px;padding:26px 22px;text-align:left;font-size:28px;line-height:1.25;box-shadow:0 18px 40px #0007;min-height:150px}
+.btns{display:flex;gap:10px;margin-top:26px;width:100%;opacity:0;transition:opacity .6s}
+.btns.show{opacity:1}
+button{font:700 16px Manrope,sans-serif;border:0;border-radius:999px;padding:16px 20px;cursor:pointer;transition:transform .15s,opacity .3s}
+button:active{transform:scale(.96)}
+button:focus-visible{outline:3px solid #ffd6e6;outline-offset:3px}
+.go{flex:1;background:linear-gradient(#f9a6c5,var(--pink2));color:#3a0e24;box-shadow:0 8px 24px #e0649a55}
+.no{background:var(--glass);color:var(--ink);border:1px solid #ffffff22}
+.no.gone{display:none}
+/* выбор */
+.list{width:100%;display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.row{background:var(--glass);border:1px solid #ffffff14;color:var(--soft);border-radius:14px;padding:13px;font-weight:500;font-size:16px}
+.row[aria-pressed=true]{background:#ffffff1f;color:#fff;border-color:#f58db388}
+.times{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:22px}
+.times .row{padding:11px 16px;border-radius:999px}
+.go:disabled{opacity:.35;cursor:default;width:100%}
+/* финал */
+.card{width:100%;background:var(--glass);border:1px solid #ffffff1a;border-radius:16px;padding:22px;font:600 24px 'Cormorant Garamond',serif;margin-bottom:12px;backdrop-filter:blur(6px)}
+.wide{width:100%;margin-bottom:10px}
+.fall{position:fixed;top:-40px;pointer-events:none;z-index:9;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(112vh) rotate(40deg)}}
+@media (prefers-reduced-motion:reduce){.fall{display:none}.scene.on,.tap{animation:none}}
+.tease{font:600 38px/1.2 'Cormorant Garamond',serif;color:var(--ink);display:none;animation:in 1s both}
+.tease.on{display:block}
+#tw{display:none;position:relative;width:100%;filter:drop-shadow(0 0 36px rgba(245,141,179,.5));margin-bottom:16px}
+#tw.on{display:block;animation:drop 1.5s cubic-bezier(.2,1.15,.3,1) both}
+@keyframes drop{0%{opacity:0;transform:translateY(-110vh) rotate(-12deg) scale(.9)}50%{opacity:1}100%{transform:none}}
+#tw img{width:100%;display:block;border-radius:22px}
+#tw::after{content:'';position:absolute;inset:0;border-radius:22px;pointer-events:none;background:linear-gradient(110deg,transparent 35%,rgba(255,255,255,.3) 50%,transparent 65%);background-size:260% 100%;animation:sweep 3.2s 1.6s infinite}
+@keyframes sweep{from{background-position:130% 0}to{background-position:-130% 0}}
+.fb{width:100%;opacity:0;pointer-events:none;transition:opacity .8s}
+.fb.on{opacity:1;pointer-events:auto}
+.env .body{inset:0;border-radius:10px;background:linear-gradient(160deg,#f3eee6,#d9d2c6)}
+.env .sd{inset:0;border-radius:10px;background:linear-gradient(#0000,#00000014);clip-path:polygon(0 100%,50% 46%,100% 100%)}
+.env .fl{left:0;top:0;width:100%;height:60%;clip-path:polygon(0 0,100% 0,50% 100%);background:linear-gradient(#efeae2,#d0c9be);border-radius:10px 10px 0 0}
+.env.crack .seal{animation:crack .75s both}
+@keyframes crack{0%{transform:scale(1)}20%{transform:scale(1.15) rotate(-8deg)}40%{transform:scale(1.15) rotate(8deg)}60%{transform:scale(1.3) rotate(-4deg);opacity:1}100%{transform:scale(1.9);opacity:0}}
+.env.crack .nm{opacity:0;transition:opacity .3s}
+.env.gone{opacity:0;transform:translateY(90px) rotate(-3deg) scale(.92)}
+#s2.on .note{animation:noteIn 1s cubic-bezier(.2,.9,.3,1) both}
+@keyframes noteIn{from{opacity:0;transform:translateY(130px) scale(.7)}to{opacity:1;transform:none}}
+.note{font-size:27px;line-height:1.25;padding:30px 24px 28px;background:var(--cream) repeating-linear-gradient(transparent 0 33px,rgba(196,70,124,.10) 33px 34px)}
+.note .l1{font-size:46px;color:#c4467c;margin-bottom:12px}
+.note .l2{color:#a53a6b;margin-bottom:4px}
+.note .l3{font-size:44px;line-height:1.08;margin-top:22px;color:#7a1f4d}
+.scene{position:relative;z-index:1}
+</style>
+</head>
+<body>
+
+<section class="scene on" id="s1">
+  <div class="env" id="env" role="button" tabindex="0" aria-label="Открыть письмо">
+    <div class="body"></div><div class="sd"></div><div class="fl"></div>
+    <div class="seal" id="seal"></div><div class="nm" id="nm"></div>
+  </div>
+  <p class="tap" id="tap">коснись, чтобы открыть</p>
+</section>
+
+<section class="scene" id="s2">
+  <div class="note hand" id="note"></div>
+  <div class="btns" id="btns">
+    <button class="go" id="yes">Приду</button>
+    <button class="no" id="no">Не смогу</button>
+  </div>
+</section>
+
+<section class="scene" id="s3">
+  <h2>Когда?</h2>
+  <div class="list" id="days"></div>
+  <div class="times" id="times"></div>
+  <button class="go" id="pick" disabled>Выбери день и время</button>
+</section>
+
+<section class="scene" id="s4">
+  <p class="tease" id="tease">Тогда у меня для тебя<br>кое-что есть…</p>
+  <div id="tw"><img id="poster" alt="Билет на свидание"></div>
+  <div id="fb" class="fb"><button class="go wide" id="save">Сохранить билет</button>
+  <button class="no wide" id="cal">Добавить в календарь</button></div>
+</section>
+
+<script>
+var CFG = {
+  bot: '8363836220:AAEXXmbHef4STpJVPib8NsQx6Fo0mb8ll3A',   // токен бота от @BotFather
+  chat: '8562554669',  // твой chat id
+  to: 'Эля',
+  text: 'Хочу позвать тебя на свидание. Выбери день и время, остальное за мной.'
+};
+var q = new URLSearchParams(location.search);
+if(q.get('to')) CFG.to = q.get('to');
+var $ = function(i){return document.getElementById(i)};
+function notify(t){
+  if(!CFG.bot||!CFG.chat) return;
+  try{fetch('https://api.telegram.org/bot'+CFG.bot+'/sendMessage',{method:'POST',mode:'no-cors',
+    headers:{'Content-Type':'application/x-www-form-urlencoded'},
+    body:'chat_id='+encodeURIComponent(CFG.chat)+'&text='+encodeURIComponent(t)}).catch(function(){})}catch(e){}
+}
+function show(id){document.querySelectorAll('.scene').forEach(function(s){s.classList.remove('on')});$(id).classList.add('on')}
+function rain(){
+  var e=['💗','💜','🤍','💖'];
+  for(var i=0;i<36;i++){var s=document.createElement('span');s.className='fall';s.textContent=e[i%4];
+    s.style.left=Math.random()*100+'vw';s.style.fontSize=16+Math.random()*24+'px';
+    s.style.animationDuration=2.5+Math.random()*3+'s';s.style.animationDelay=Math.random()*1.2+'s';
+    document.body.appendChild(s);setTimeout(function(x){x.remove()},8000,s)}
+}
+
+$('seal').textContent = CFG.to.charAt(0).toUpperCase();
+$('nm').textContent = CFG.to;
+
+// 1. конверт
+var opened=false;
+function open(){
+  if(opened) return; opened=true;
+  notify('💌 '+CFG.to+' открыла письмо');
+  $('env').classList.add('crack'); $('tap').style.visibility='hidden';
+  setTimeout(function(){$('env').classList.add('gone')},800);
+  setTimeout(function(){show('s2');type()},1250);
+}
+$('env').addEventListener('click',open);
+$('env').addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' ')open()});
+
+// 2. письмо
+function floaters(){
+  for(var k=0;k<16;k++){var h=document.createElement('span');h.textContent=['💗','💜','🤍'][k%3];
+    h.style.cssText='position:fixed;bottom:-40px;left:'+Math.random()*100+'vw;font-size:'+(14+Math.random()*22)+'px;pointer-events:none;opacity:.5;z-index:0';
+    document.body.appendChild(h);
+    h.animate([{transform:'translateY(0) rotate(0)',opacity:0},{opacity:.55,offset:.15},{transform:'translateY(-115vh) rotate('+(Math.random()*60-30)+'deg)',opacity:0}],
+      {duration:9000+Math.random()*8000,delay:Math.random()*5000,iterations:Infinity,easing:'linear'});}
+}
+function type(){
+  floaters();
+  var L=[[CFG.to+',','l1'],['я долго думал, как позвать тебя так, чтобы ты это запомнила.','l2'],['Поэтому — письмо.','l2'],['Пойдёшь со мной на свидание?','l3']];
+  var n=$('note'); n.innerHTML=''; var li=0;
+  (function next(){
+    if(li>=L.length){setTimeout(function(){$('btns').classList.add('show')},500);return}
+    var d=document.createElement('div'); d.className=L[li][1]; n.appendChild(d);
+    var t=L[li][0], i=0, last=(li===L.length-1);
+    var iv=setInterval(function(){
+      d.textContent=t.slice(0,++i);
+      if(i>=t.length){clearInterval(iv);li++;setTimeout(next,last?300:(li===L.length-1?1100:450))}
+    },last?65:38);
+  })();
+}
+var nos=0, labels=['Не смогу','Точно?','Ну пожалуйста','Подумай ещё'];
+$('no').onclick=function(){
+  nos++; notify('😅 Нажала «Не смогу» ('+nos+')');
+  if(nos>=labels.length){$('no').classList.add('gone');return}
+  $('no').textContent=labels[nos];
+  $('yes').style.flex=1+nos*0.6;
+};
+$('yes').onclick=function(){notify('💗 Нажала «Приду»!');show('s3');rain()};
+
+// 3. выбор даты и времени
+var chosenDay=null, chosenTime=null, chosenDate=null;
+var fmt=new Intl.DateTimeFormat('ru-RU',{weekday:'long',day:'numeric',month:'long'});
+for(var d=1; d<=6; d++){
+  (function(k){
+    var dt=new Date(); dt.setDate(dt.getDate()+k);
+    var b=document.createElement('button'); b.className='row'; b.setAttribute('aria-pressed','false');
+    b.textContent=fmt.format(dt);
+    b.onclick=function(){
+      document.querySelectorAll('#days .row').forEach(function(x){x.setAttribute('aria-pressed','false')});
+      b.setAttribute('aria-pressed','true'); chosenDay=b.textContent; chosenDate=dt; check();
+    };
+    $('days').appendChild(b);
+  })(d);
+}
+['12:00','15:00','17:00','19:00','21:00'].forEach(function(t){
+  var b=document.createElement('button'); b.className='row'; b.setAttribute('aria-pressed','false'); b.textContent=t;
+  b.onclick=function(){
+    document.querySelectorAll('#times .row').forEach(function(x){x.setAttribute('aria-pressed','false')});
+    b.setAttribute('aria-pressed','true'); chosenTime=t; check();
+  };
+  $('times').appendChild(b);
+});
+function check(){
+  var ok=chosenDay&&chosenTime; $('pick').disabled=!ok;
+  $('pick').textContent= ok ? 'Готово' : 'Выбери день и время';
+}
+var ACC={0:'в воскресенье',1:'в понедельник',2:'во вторник',3:'в среду',4:'в четверг',5:'в пятницу',6:'в субботу'};
+function heart(c,x,y,sz,col){c.save();c.translate(x,y);c.scale(sz/30,sz/30);c.beginPath();c.moveTo(0,8);
+  c.bezierCurveTo(-24,-8,-12,-26,0,-12);c.bezierCurveTo(12,-26,24,-8,0,8);c.fillStyle=col;c.fill();c.restore()}
+function wrap(c,t,x,y,w,lh){var words=t.split(' '),l='';
+  for(var k=0;k<words.length;k++){var tt=l+words[k]+' ';
+    if(c.measureText(tt).width>w&&l){c.fillText(l.trim(),x,y);y+=lh;l=words[k]+' '}else l=tt}
+  c.fillText(l.trim(),x,y);return y}
+function rr(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath()}
+function ls(c,v){if('letterSpacing' in c)c.letterSpacing=v+'px'}
+function poster(){
+  var W=1080,H=1680,cv=document.createElement('canvas');cv.width=W;cv.height=H;var c=cv.getContext('2d');
+  c.fillStyle='#14070f';c.fillRect(0,0,W,H);
+  var seed=7;function rnd(){seed=(seed*9301+49297)%233280;return seed/233280}
+  for(var k=0;k<70;k++){c.fillStyle='rgba(255,214,230,'+(.1+rnd()*.35)+')';c.beginPath();c.arc(rnd()*W,rnd()*H,rnd()*2.4+.6,0,7);c.fill()}
+  var X=80,Y=100,TW=920,TH=1480;
+  var g=c.createLinearGradient(0,Y,0,Y+TH);g.addColorStop(0,'#4a1a3c');g.addColorStop(.7,'#2c1030');g.addColorStop(1,'#220c26');
+  rr(c,X,Y,TW,TH,44);c.fillStyle=g;c.fill();
+  var gl=c.createRadialGradient(540,520,30,540,520,520);gl.addColorStop(0,'rgba(245,141,179,.28)');gl.addColorStop(1,'rgba(245,141,179,0)');
+  c.save();rr(c,X,Y,TW,TH,44);c.clip();c.fillStyle=gl;c.fillRect(X,Y,TW,TH);c.restore();
+  var gold=c.createLinearGradient(X,Y,X+TW,Y+TH);gold.addColorStop(0,'#ffe3b0');gold.addColorStop(.5,'#f58db3');gold.addColorStop(1,'#ffd08a');
+  rr(c,X,Y,TW,TH,44);c.strokeStyle=gold;c.lineWidth=7;c.stroke();
+  rr(c,X+24,Y+24,TW-48,TH-48,30);c.strokeStyle='rgba(255,214,160,.28)';c.lineWidth=2;c.stroke();
+  var PY=1190;
+  c.fillStyle='#14070f';[X,X+TW].forEach(function(x){c.beginPath();c.arc(x,PY,40,0,7);c.fill()});
+  c.strokeStyle=gold;c.lineWidth=5;[X,X+TW].forEach(function(x){c.beginPath();c.arc(x,PY,40,x===X?-1.571:1.571,x===X?1.571:4.712,x!==X);c.stroke()});
+  c.setLineDash([14,12]);c.strokeStyle='rgba(255,214,160,.5)';c.lineWidth=3;c.beginPath();c.moveTo(X+60,PY);c.lineTo(X+TW-60,PY);c.stroke();c.setLineDash([]);
+  c.textAlign='center';
+  c.fillStyle='#ffd9a0';c.font='600 30px Manrope, sans-serif';ls(c,12);c.fillText('ПРИГЛАШЕНИЕ',540,215);ls(c,0);
+  heart(c,540,275,34,'#f58db3');
+  c.fillStyle='#f58db3';c.font='700 230px Caveat, cursive';c.fillText(CFG.to,540,500);
+  c.fillStyle='#fbf6ee';c.font='600 92px "Cormorant Garamond", serif';c.fillText('билет на свидание',540,610);
+  c.strokeStyle='rgba(255,214,160,.45)';c.lineWidth=2;c.beginPath();c.moveTo(200,672);c.lineTo(880,672);c.stroke();
+  var wd=new Intl.DateTimeFormat('ru-RU',{weekday:'long'}).format(chosenDate);
+  var dm=new Intl.DateTimeFormat('ru-RU',{day:'numeric',month:'long'}).format(chosenDate);
+  c.fillStyle='#ffd9a0';c.font='600 28px Manrope, sans-serif';ls(c,10);c.fillText('ДЕНЬ',540,745);ls(c,0);
+  c.fillStyle='#fff3e0';c.font='600 150px "Cormorant Garamond", serif';c.fillText(wd.charAt(0).toUpperCase()+wd.slice(1),540,885);
+  c.fillStyle='#ffd9a0';c.font='600 28px Manrope, sans-serif';ls(c,10);c.fillText('ДАТА',330,975);c.fillText('ВРЕМЯ',750,975);ls(c,0);
+  c.fillStyle='#fbf6ee';c.font='600 84px "Cormorant Garamond", serif';c.fillText(dm,330,1070);c.fillText(chosenTime,750,1070);
+  c.strokeStyle='rgba(255,214,160,.4)';c.lineWidth=2;c.beginPath();c.moveTo(540,950);c.lineTo(540,1090);c.stroke();
+  c.fillStyle='#f6e6ee';c.font='700 54px Caveat, cursive';
+  wrap(c,'Я заеду за тобой. От тебя только хорошее настроение и красота. Хотя с этим ты и так справляешься лучше всех.',540,1285,740,66);
+  seed=11;var bx=230;c.fillStyle='rgba(255,214,160,.8)';
+  while(bx<850){var bw=2+Math.floor(rnd()*6);c.fillRect(bx,1480,bw,56);bx+=bw+2+Math.floor(rnd()*5)}
+  return cv;
+}
+function burst(){
+  var e=['💗','💜','🤍','💖','✨'];
+  for(var k=0;k<34;k++){var s=document.createElement('span');s.textContent=e[k%5];
+    s.style.cssText='position:fixed;left:50%;top:42%;z-index:9;pointer-events:none;font-size:'+(18+Math.random()*26)+'px';
+    document.body.appendChild(s);var a=Math.random()*6.28,d=140+Math.random()*260;
+    s.animate([{transform:'translate(-50%,-50%) scale(.3)',opacity:1},{transform:'translate(calc(-50% + '+Math.cos(a)*d+'px),calc(-50% + '+Math.sin(a)*d+'px)) scale(1.2)',opacity:0}],{duration:1500+Math.random()*700,easing:'cubic-bezier(.2,.8,.3,1)'}).onfinish=function(){this.effect.target.remove()};
+  }
+}
+var cvs=null;
+$('pick').onclick=function(){
+  notify('🎉 '+CFG.to+' выбрала: '+chosenDay+', '+chosenTime);
+  var f=document.fonts&&document.fonts.load?Promise.all([
+    document.fonts.load('600 40px "Cormorant Garamond"','Договорились'),
+    document.fonts.load('700 40px Caveat','Эля'),
+    document.fonts.load('500 30px Manrope','ПРИГЛАШЕНИЕ')]):Promise.resolve();
+  f.catch(function(){}).then(function(){
+    cvs=poster();$('poster').src=cvs.toDataURL('image/png');
+    show('s4');$('tease').classList.add('on');
+    setTimeout(function(){$('tease').classList.remove('on');$('tw').classList.add('on')},2400);
+    setTimeout(function(){burst();rain()},3500);
+    setTimeout(function(){$('fb').classList.add('on')},4600);
+  });
+};
+$('save').onclick=function(){
+  var a=document.createElement('a');a.href=cvs.toDataURL('image/png');a.download='bilet.png';
+  document.body.appendChild(a);a.click();a.remove();
+};
+$('cal').onclick=function(){
+  var p=chosenTime.split(':'), s=new Date(chosenDate); s.setHours(+p[0],+p[1],0,0);
+  var e=new Date(s.getTime()+2*3600000);
+  var z=function(x){return x.getFullYear()+('0'+(x.getMonth()+1)).slice(-2)+('0'+x.getDate()).slice(-2)+'T'+('0'+x.getHours()).slice(-2)+('0'+x.getMinutes()).slice(-2)+'00'};
+  var ics='BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nSUMMARY:Свидание 💜\nDTSTART:'+z(s)+'\nDTEND:'+z(e)+'\nEND:VEVENT\nEND:VCALENDAR';
+  var a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([ics],{type:'text/calendar'}));
+  a.download='date.ics'; document.body.appendChild(a); a.click(); a.remove();
+};
+</script>
+</body>
+</html>
